@@ -11,6 +11,7 @@ import { getProgram, fetchBetsForWallet } from "@/lib/veilmarket";
 import { WalletButton } from "@/components/WalletButton";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { StatCardSkeleton } from "@/components/Skeletons";
 
 type Stats = {
   balance: number;
@@ -94,7 +95,7 @@ export default function ProfilePage() {
         totalStaked,
       });
     } catch (err) {
-      console.error("Error cargando perfil:", err);
+      console.error("Error loading profile:", err);
     } finally {
       setLoading(false);
     }
@@ -121,14 +122,14 @@ export default function ProfilePage() {
   // verificable de las stats calculadas arriba.
   const achievements = stats
     ? [
-        { icon: "🎯", label: "Primera apuesta", earned: stats.marketsJoined >= 1 },
+        { icon: "🎯", label: t("prof_first_bet"), earned: stats.marketsJoined >= 1 },
         {
           icon: "🎖️",
-          label: "Tirador certero",
+          label: t("prof_sharpshooter"),
           earned: stats.accuracy !== null && stats.accuracy >= 70 && stats.resolvedCount >= 3,
         },
-        { icon: "🛠️", label: "Creador", earned: stats.marketsCreated >= 1 },
-        { icon: "🐋", label: "Alta apuesta", earned: stats.totalStaked >= 0.5 },
+        { icon: "🛠️", label: t("prof_creator"), earned: stats.marketsCreated >= 1 },
+        { icon: "🐋", label: t("prof_high_roller"), earned: stats.totalStaked >= 0.5 },
       ]
     : [];
 
@@ -164,34 +165,37 @@ export default function ProfilePage() {
         {!wallet.connected ? (
           <div className="glass-card rounded-2xl p-6 text-center">
             <p className="text-sm text-[color:var(--color-text-dim)]">
-              Conecta tu wallet para ver tu perfil.
+              {t("prof_connect_prompt")}
             </p>
           </div>
         ) : loading || !stats ? (
-          <motion.p
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.4, repeat: Infinity }}
-            className="text-sm font-mono text-[color:var(--color-text-dim)]"
-          >
-            Cargando perfil...
-          </motion.p>
+          <div className="space-y-4">
+            <div className="flex justify-between gap-3">
+              <StatCardSkeleton className="flex-1" />
+              <StatCardSkeleton className="flex-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <StatCardSkeleton className="aspect-square" />
+              <StatCardSkeleton className="aspect-square" />
+            </div>
+          </div>
         ) : (
           <>
             {/* Titulo + direccion real + PnL real */}
             <div className="flex justify-between items-end mb-6">
               <div>
-                <h2 className="text-2xl font-bold">Perfil</h2>
+                <h2 className="text-2xl font-bold">{t("prof_title")}</h2>
                 <button
                   onClick={copyAddress}
                   className="flex items-center gap-1.5 mt-1 opacity-60 hover:opacity-100 transition-opacity"
                 >
                   <span className="text-xs font-mono">{shortAddress}</span>
-                  <span className="text-[10px]">{copied ? "✓ copiado" : "📋"}</span>
+                  <span className="text-[10px]">{copied ? t("prof_copied") : "📋"}</span>
                 </button>
               </div>
               <div className="text-right">
                 <span className="text-[10px] uppercase tracking-widest font-bold block mb-1" style={{ color: "var(--color-primary-bright)" }}>
-                  Ganancia neta
+                  {t("prof_net_gain")}
                 </span>
                 <span
                   className="text-xl font-bold"
@@ -204,7 +208,7 @@ export default function ProfilePage() {
                   {stats.netPnl.toFixed(3)} SOL
                 </span>
                 <p className="text-[9px] text-[color:var(--color-text-dim)] mt-0.5">
-                  solo mercados resueltos
+                  {t("prof_resolved_only")}
                 </p>
               </div>
             </div>
@@ -215,28 +219,28 @@ export default function ProfilePage() {
                 <span className="text-2xl">📊</span>
                 <div>
                   <p className="text-[10px] uppercase text-[color:var(--color-text-dim)] mb-1">
-                    % de aciertos
+                    {t("prof_accuracy")}
                   </p>
                   <p className="text-2xl font-bold">
                     {stats.accuracy !== null ? `${stats.accuracy.toFixed(1)}%` : "—"}
                   </p>
                   <p className="text-[9px] text-[color:var(--color-text-dim)] mt-1">
                     {stats.resolvedCount > 0
-                      ? `${stats.wonCount}/${stats.resolvedCount} resueltos`
-                      : "Sin mercados resueltos aun"}
+                      ? `${stats.wonCount}/${stats.resolvedCount} ${t("prof_resolved_suffix")}`
+                      : t("prof_no_resolved")}
                   </p>
                 </div>
               </div>
               <div className="flex flex-col gap-3">
                 <div className="glass-card p-3 rounded-2xl flex-1 flex flex-col justify-center">
                   <p className="text-[10px] uppercase text-[color:var(--color-text-dim)] mb-1">
-                    Mercados en los que participaste
+                    {t("prof_markets_joined")}
                   </p>
                   <p className="text-lg font-bold">{stats.marketsJoined}</p>
                 </div>
                 <div className="glass-card p-3 rounded-2xl flex-1 flex flex-col justify-center">
                   <p className="text-[10px] uppercase text-[color:var(--color-text-dim)] mb-1">
-                    Mercados creados
+                    {t("prof_markets_created")}
                   </p>
                   <p className="text-lg font-bold">{stats.marketsCreated}</p>
                 </div>
@@ -246,7 +250,7 @@ export default function ProfilePage() {
             {/* Logros con umbrales reales */}
             <div className="mb-6">
               <h3 className="text-xs uppercase tracking-widest text-[color:var(--color-text-dim)] font-bold mb-3">
-                Logros
+                {t("prof_achievements")}
               </h3>
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {achievements.map((a) => (
@@ -278,7 +282,7 @@ export default function ProfilePage() {
                   <div className="w-10 h-10 rounded-xl bg-[color:var(--color-surface-high)] flex items-center justify-center text-lg">
                     🧾
                   </div>
-                  <span className="text-sm">Ver historial en Explorer</span>
+                  <span className="text-sm">{t("prof_view_history")}</span>
                 </div>
                 <span className="text-[color:var(--color-text-dim)]">›</span>
               </a>
@@ -291,7 +295,7 @@ export default function ProfilePage() {
                   <div className="w-10 h-10 rounded-xl bg-[color:var(--color-surface-high)] flex items-center justify-center text-lg">
                     💼
                   </div>
-                  <span className="text-sm">Ver portafolio completo</span>
+                  <span className="text-sm">{t("prof_view_full_portfolio")}</span>
                 </div>
                 <span className="text-[color:var(--color-text-dim)]">›</span>
               </Link>
@@ -304,7 +308,7 @@ export default function ProfilePage() {
                   🚪
                 </div>
                 <span className="text-sm" style={{ color: "var(--color-secondary-bright)" }}>
-                  Desconectar wallet
+                  {t("prof_disconnect")}
                 </span>
               </button>
             </div>

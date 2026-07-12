@@ -27,3 +27,26 @@ function Shimmer() {
     />
   );
 }
+
+export function StatCardSkeleton({ className = "" }: { className?: string }) {
+  return (
+    <div className={`rounded-2xl bg-[color:var(--color-surface)] p-4 relative overflow-hidden ${className}`}>
+      <Shimmer />
+      <div className="h-3 w-16 rounded bg-[color:var(--color-surface-raised)] mb-2" />
+      <div className="h-6 w-20 rounded bg-[color:var(--color-surface-raised)]" />
+    </div>
+  );
+}
+
+export function ListRowSkeleton() {
+  return (
+    <div className="rounded-2xl bg-[color:var(--color-surface)] p-4 flex items-center gap-3 relative overflow-hidden">
+      <Shimmer />
+      <div className="w-11 h-11 rounded-full bg-[color:var(--color-surface-raised)] shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3 w-3/4 rounded bg-[color:var(--color-surface-raised)]" />
+        <div className="h-2.5 w-1/3 rounded bg-[color:var(--color-surface-raised)]" />
+      </div>
+    </div>
+  );
+}

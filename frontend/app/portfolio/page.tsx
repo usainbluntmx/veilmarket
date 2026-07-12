@@ -12,6 +12,7 @@ import { getProgram, fetchBetsForWallet } from "@/lib/veilmarket";
 import { WalletButton } from "@/components/WalletButton";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { StatCardSkeleton, ListRowSkeleton } from "@/components/Skeletons";
 
 type CreatedMarket = {
   pubkey: string;
@@ -102,7 +103,7 @@ export default function PortfolioPage() {
         return {
           marketPubkey,
           matchId: marketAcc?.matchId ?? "?",
-          question: marketAcc?.question ?? "Mercado desconocido",
+          question: marketAcc?.question ?? "Unknown market",
           resolved: !!marketAcc?.resolved,
           outcome: !!marketAcc?.outcome,
           amount,
@@ -117,7 +118,7 @@ export default function PortfolioPage() {
       pos.sort((a, b) => Number(a.claimed) - Number(b.claimed));
       setPositions(pos);
     } catch (err) {
-      console.error("Error cargando portafolio:", err);
+      console.error("Error loading portfolio:", err);
     } finally {
       setLoading(false);
     }
@@ -165,24 +166,27 @@ export default function PortfolioPage() {
         {!wallet.connected ? (
           <div className="glass-card rounded-2xl p-6 text-center">
             <p className="text-sm text-[color:var(--color-text-dim)]">
-              Conecta tu wallet para ver tu portafolio.
+              {t("port_connect_prompt")}
             </p>
           </div>
         ) : loading ? (
-          <motion.p
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.4, repeat: Infinity }}
-            className="text-sm font-mono text-[color:var(--color-text-dim)]"
-          >
-            Cargando portafolio...
-          </motion.p>
+          <div className="space-y-4">
+            <StatCardSkeleton className="aspect-[3/1.4]" />
+            <div className="grid grid-cols-3 gap-2">
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </div>
+            <ListRowSkeleton />
+            <ListRowSkeleton />
+          </div>
         ) : (
           <>
             {/* Balance real */}
             <section className="mb-4">
               <div className="glass-card rounded-2xl p-5 flex flex-col items-center border" style={{ borderColor: "rgba(20,241,149,0.2)" }}>
                 <span className="text-[10px] uppercase tracking-widest text-[color:var(--color-text-dim)] font-bold mb-1">
-                  Balance de tu wallet
+                  {t("port_wallet_balance")}
                 </span>
                 <h1 className="text-3xl font-bold mb-1" style={{ color: "var(--color-primary-bright)" }}>
                   <AnimatedNumber value={balance ?? 0} decimals={3} suffix=" SOL" />
@@ -192,7 +196,7 @@ export default function PortfolioPage() {
                     className="mt-2 text-[11px] font-mono px-3 py-1 rounded-full"
                     style={{ background: "var(--color-primary-dim)", color: "var(--color-primary-bright)" }}
                   >
-                    {claimable} payout{claimable > 1 ? "s" : ""} por reclamar →
+                    {claimable} {claimable > 1 ? t("port_payout_plural") : t("port_payout_singular")} {t("port_to_claim")}
                   </span>
                 )}
               </div>
@@ -201,28 +205,28 @@ export default function PortfolioPage() {
             {/* Stats reales */}
             <section className="grid grid-cols-3 gap-2 mb-6">
               <div className="glass-card p-3 rounded-xl flex flex-col">
-                <span className="text-[9px] text-[color:var(--color-text-dim)] uppercase">Creados</span>
+                <span className="text-[9px] text-[color:var(--color-text-dim)] uppercase">{t("port_created")}</span>
                 <span className="text-lg font-bold">{created.length}</span>
               </div>
               <div className="glass-card p-3 rounded-xl flex flex-col">
-                <span className="text-[9px] text-[color:var(--color-text-dim)] uppercase">Activas</span>
+                <span className="text-[9px] text-[color:var(--color-text-dim)] uppercase">{t("port_active")}</span>
                 <span className="text-lg font-bold" style={{ color: "var(--color-secondary-bright)" }}>
                   {activeBets}
                 </span>
               </div>
               <div className="glass-card p-3 rounded-xl flex flex-col">
-                <span className="text-[9px] text-[color:var(--color-text-dim)] uppercase">Apostado</span>
+                <span className="text-[9px] text-[color:var(--color-text-dim)] uppercase">{t("port_staked")}</span>
                 <span className="text-lg font-bold">{totalStaked.toFixed(3)}</span>
               </div>
             </section>
 
             {/* Tus apuestas */}
             <section className="mb-6">
-              <h2 className="text-sm font-bold mb-3">Tus apuestas</h2>
+              <h2 className="text-sm font-bold mb-3">{t("port_your_bets")}</h2>
               {positions.length === 0 ? (
                 <div className="glass-card rounded-2xl p-5 text-center">
                   <p className="text-xs text-[color:var(--color-text-dim)]">
-                    Aun no has apostado en ningun mercado.
+                    {t("port_no_bets")}
                   </p>
                 </div>
               ) : (
@@ -248,38 +252,38 @@ export default function PortfolioPage() {
                               : "var(--color-text-dim)",
                           }}
                         >
-                          {p.predictedOutcome ? "SI" : "NO"}
+                          {p.predictedOutcome ? t("yes") : t("no")}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm truncate">{p.question}</h3>
                           <div className="flex items-center gap-1.5 mt-1">
                             <span className="text-[10px] font-mono text-[color:var(--color-text-dim)]">
-                              {p.amount.toFixed(3)} SOL apostado
+                              {p.amount.toFixed(3)} {t("port_staked_suffix")}
                             </span>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
                           {!p.resolved ? (
                             <span className="text-[11px] font-mono" style={{ color: "var(--color-secondary-bright)" }}>
-                              En vivo
+                              {t("port_live")}
                             </span>
                           ) : p.won ? (
                             <>
                               <div className="text-sm font-bold" style={{ color: "var(--color-primary-bright)" }}>
                                 {p.claimed
-                                  ? "Reclamado"
+                                  ? t("port_claimed")
                                   : p.estimatedPayout !== null
                                   ? `+${p.estimatedPayout.toFixed(3)}`
-                                  : "Ganaste"}
+                                  : t("port_won")}
                               </div>
                               {!p.claimed && (
                                 <span className="text-[10px] font-mono" style={{ color: "var(--color-primary-bright)" }}>
-                                  Reclamar →
+                                  {t("port_claim_arrow")}
                                 </span>
                               )}
                             </>
                           ) : (
-                            <div className="text-sm font-mono text-[color:var(--color-text-dim)]">Perdiste</div>
+                            <div className="text-sm font-mono text-[color:var(--color-text-dim)]">{t("port_lost")}</div>
                           )}
                         </div>
                       </motion.div>
@@ -291,18 +295,18 @@ export default function PortfolioPage() {
 
             {/* Mercados que creaste */}
             <section>
-              <h2 className="text-sm font-bold mb-3">Mercados que creaste</h2>
+              <h2 className="text-sm font-bold mb-3">{t("port_your_markets")}</h2>
               {created.length === 0 ? (
                 <div className="glass-card rounded-2xl p-5 text-center">
                   <p className="text-xs text-[color:var(--color-text-dim)] mb-3">
-                    Aun no has creado ningun mercado.
+                    {t("port_no_markets")}
                   </p>
                   <Link
                     href="/"
                     className="inline-block text-xs font-mono px-4 py-2 rounded-full"
                     style={{ background: "var(--color-primary)", color: "#080808" }}
                   >
-                    Crear mercado
+                    {t("feed_create_market")}
                   </Link>
                 </div>
               ) : (
@@ -321,7 +325,7 @@ export default function PortfolioPage() {
                             {m.totalPool.toFixed(3)} SOL
                           </div>
                           <span className="text-[10px] font-mono text-[color:var(--color-text-dim)]">
-                            {m.resolved ? "Resuelto" : "En vivo"}
+                            {m.resolved ? t("feed_resolved") : t("port_live")}
                           </span>
                         </div>
                       </motion.div>

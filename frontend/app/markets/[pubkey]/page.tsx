@@ -25,6 +25,7 @@ import {
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { SwipeToConfirm } from "@/components/SwipeToConfirm";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { Toast, ToastState } from "@/components/Toast";
 
 type MarketData = {
   authority: PublicKey;
@@ -74,6 +75,7 @@ export default function MarketDetailPage() {
   const [betDelegated, setBetDelegated] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [erLatencyMs, setErLatencyMs] = useState<number | null>(null);
+  const [toast, setToast] = useState<ToastState>(null);
 
   const getBaseProgram = useCallback(() => {
     const provider = new AnchorProvider(
@@ -157,16 +159,16 @@ export default function MarketDetailPage() {
 
   function friendlyError(err: any): string {
     const msg = err?.message ?? String(err);
-    if (msg.includes("0x1")) return "Fondos insuficientes en tu wallet.";
+    if (msg.includes("0x1")) return t("err_insufficient_funds");
     if (msg.toLowerCase().includes("already in use"))
-      return "Esa cuenta ya existe.";
+      return t("err_account_exists");
     return msg.length > 140 ? msg.slice(0, 140) + "..." : msg;
   }
 
   async function handlePlaceBet() {
     if (!wallet.publicKey) return;
     setBusy(true);
-    setBusyLabel("Enviando apuesta...");
+    setBusyLabel(t("busy_sending_bet"));
     setError(null);
     try {
       const program = getBaseProgram();
@@ -184,6 +186,7 @@ export default function MarketDetailPage() {
         .rpc();
 
       await load();
+      setToast({ message: t("toast_bet_placed"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -196,7 +199,7 @@ export default function MarketDetailPage() {
   async function handleResolve(outcome: boolean) {
     if (!wallet.publicKey) return;
     setBusy(true);
-    setBusyLabel("Resolviendo...");
+    setBusyLabel(t("busy_resolving"));
     setError(null);
     try {
       const program = getBaseProgram();
@@ -208,6 +211,7 @@ export default function MarketDetailPage() {
         })
         .rpc();
       await load();
+      setToast({ message: t("toast_market_resolved"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -220,7 +224,7 @@ export default function MarketDetailPage() {
   async function handleResolveVrf() {
     if (!wallet.publicKey) return;
     setBusy(true);
-    setBusyLabel("Solicitando azar verificable (VRF)...");
+    setBusyLabel(t("busy_requesting_vrf"));
     setError(null);
     try {
       const program = getBaseProgram();
@@ -235,7 +239,7 @@ export default function MarketDetailPage() {
         })
         .rpc();
 
-      setBusyLabel("Esperando al oraculo VRF...");
+      setBusyLabel(t("busy_waiting_vrf"));
       const start = Date.now();
       while (Date.now() - start < 30000) {
         await new Promise((r) => setTimeout(r, 1500));
@@ -243,6 +247,7 @@ export default function MarketDetailPage() {
         if (m.resolved) break;
       }
       await load();
+      setToast({ message: t("toast_market_resolved"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -255,7 +260,7 @@ export default function MarketDetailPage() {
   async function handleGoLive() {
     if (!wallet.publicKey || !market) return;
     setBusy(true);
-    setBusyLabel("Activando tiempo real (ER)...");
+    setBusyLabel(t("busy_activating_er"));
     setError(null);
     try {
       const program = getBaseProgram();
@@ -276,6 +281,7 @@ export default function MarketDetailPage() {
       }
 
       await load();
+      setToast({ message: t("toast_er_live"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -288,7 +294,7 @@ export default function MarketDetailPage() {
   async function handleUpdatePredictionEr(newOutcome: boolean) {
     if (!wallet.publicKey || !bet) return;
     setBusy(true);
-    setBusyLabel("Actualizando prediccion en el ER...");
+    setBusyLabel(t("busy_updating_prediction"));
     setError(null);
     try {
       const erProgram = getErProgram();
@@ -306,6 +312,7 @@ export default function MarketDetailPage() {
 
       setErLatencyMs(Date.now() - start);
       setBet((prev) => (prev ? { ...prev, predictedOutcome: newOutcome } : prev));
+      setToast({ message: t("toast_prediction_updated"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -318,7 +325,7 @@ export default function MarketDetailPage() {
   async function handleGoPrivate() {
     if (!wallet.publicKey || !bet) return;
     setBusy(true);
-    setBusyLabel("Activando privacidad (Private ER)...");
+    setBusyLabel(t("busy_activating_privacy"));
     setError(null);
     try {
       const erProgram = getErProgram();
@@ -336,6 +343,7 @@ export default function MarketDetailPage() {
       await erProgram.methods.setBetPrivacy(true).accounts(sharedAccounts).rpc();
 
       setIsPrivate(true);
+      setToast({ message: t("toast_privacy_on"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -348,7 +356,7 @@ export default function MarketDetailPage() {
   async function handleSyncToSolana() {
     if (!wallet.publicKey) return;
     setBusy(true);
-    setBusyLabel("Sincronizando a Solana...");
+    setBusyLabel(t("busy_syncing_solana"));
     setError(null);
     try {
       const erProgram = getErProgram();
@@ -369,6 +377,7 @@ export default function MarketDetailPage() {
 
       await new Promise((r) => setTimeout(r, 2500));
       await load();
+      setToast({ message: t("toast_synced"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -381,13 +390,13 @@ export default function MarketDetailPage() {
   async function handleSettleAndClaim() {
     if (!wallet.publicKey) return;
     setBusy(true);
-    setBusyLabel("Procesando payout...");
+    setBusyLabel(t("busy_processing_payout"));
     setError(null);
     try {
       const pda = betPda(marketPubkey, wallet.publicKey);
 
       if (betDelegated || marketDelegated) {
-        setBusyLabel("Sincronizando desde el ER antes de reclamar...");
+        setBusyLabel(t("busy_syncing_before_claim"));
         const erProgram = getErProgram();
         if (marketDelegated) {
           await erProgram.methods
@@ -407,7 +416,7 @@ export default function MarketDetailPage() {
       }
 
       const program = getBaseProgram();
-      setBusyLabel("Reclamando payout...");
+      setBusyLabel(t("busy_processing_payout"));
 
       if (bet && !bet.settled) {
         await program.methods
@@ -429,6 +438,7 @@ export default function MarketDetailPage() {
       });
 
       await load();
+      setToast({ message: t("toast_payout_claimed"), kind: "success" });
     } catch (err: any) {
       console.error(err);
       setError(friendlyError(err));
@@ -446,7 +456,7 @@ export default function MarketDetailPage() {
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.4, repeat: Infinity }}
         >
-          Cargando mercado...
+          {t("detail_loading")}
         </motion.p>
       </main>
     );
@@ -456,7 +466,7 @@ export default function MarketDetailPage() {
     return (
       <main className="min-h-dvh px-5 pt-20 mx-auto max-w-md">
         <p className="font-mono text-sm" style={{ color: "var(--color-secondary-bright)" }}>
-          Mercado no encontrado.
+          {t("detail_not_found")}
         </p>
       </main>
     );
@@ -528,7 +538,7 @@ export default function MarketDetailPage() {
                 className="text-[10px] font-bold uppercase tracking-wider"
                 style={{ color: market.resolved ? "var(--color-primary-bright)" : "var(--color-secondary-bright)" }}
               >
-                {market.resolved ? `Resuelto: ${market.outcome ? "SI" : "NO"}` : "Mercado en vivo"}
+                {market.resolved ? `${t("detail_resolved_prefix")} ${market.outcome ? t("yes") : t("no")}` : t("detail_market_live")}
               </span>
             </div>
           </div>
@@ -541,7 +551,7 @@ export default function MarketDetailPage() {
         <section className="grid grid-cols-2 gap-2 mt-4">
           <div className="glass-card p-4 rounded-2xl flex flex-col justify-center">
             <span className="text-[10px] uppercase tracking-widest text-[color:var(--color-text-dim)] font-bold mb-1">
-              Volumen
+              {t("detail_volume")}
             </span>
             <span className="font-bold text-lg" style={{ color: "var(--color-secondary-bright)" }}>
               <AnimatedNumber value={market.totalPool} decimals={3} suffix=" SOL" />
@@ -549,10 +559,10 @@ export default function MarketDetailPage() {
           </div>
           <div className="glass-card p-4 rounded-2xl flex flex-col justify-center">
             <span className="text-[10px] uppercase tracking-widest text-[color:var(--color-text-dim)] font-bold mb-1">
-              Odds actuales
+              {t("detail_odds_current")}
             </span>
             <span className="font-bold text-lg" style={{ color: "var(--color-primary-bright)" }}>
-              {totalOdds > 0 ? `${yesPct}% / ${100 - yesPct}%` : "Sin apuestas"}
+              {totalOdds > 0 ? `${yesPct}% / ${100 - yesPct}%` : t("detail_no_bets")}
             </span>
           </div>
         </section>
@@ -572,17 +582,14 @@ export default function MarketDetailPage() {
 
         {/* Verificacion on-chain: real, sin datos inventados */}
         <section className="mt-5">
-          <h2 className="text-sm font-bold text-white mb-2">Verificacion on-chain</h2>
+          <h2 className="text-sm font-bold text-white mb-2">{t("detail_onchain_title")}</h2>
           <div className="glass-card p-4 rounded-2xl">
             <p className="text-[color:var(--color-text-dim)] text-xs leading-relaxed mb-3">
-              Este mercado se resuelve manualmente por su creador, o mediante
-              un sorteo verificable (VRF) si el creador lo solicita en vez de
-              decidir a mano. Todo el estado — pool, apuestas, resolucion —
-              vive on-chain y es publicamente auditable.
+              {t("detail_onchain_desc")}
             </p>
             <div className="pt-3 border-t border-white/5 flex items-center justify-between">
               <span className="text-[11px] text-[color:var(--color-text-dim)] font-mono">
-                Creador: {market.authority.toBase58().slice(0, 4)}...{market.authority.toBase58().slice(-4)}
+                {t("detail_creator")} {market.authority.toBase58().slice(0, 4)}...{market.authority.toBase58().slice(-4)}
               </span>
               <a
                 href={explorerUrl}
@@ -591,7 +598,7 @@ export default function MarketDetailPage() {
                 className="text-[11px] font-bold font-mono"
                 style={{ color: "var(--color-primary-bright)" }}
               >
-                Ver en Explorer →
+                {t("detail_view_explorer")}
               </a>
             </div>
           </div>
@@ -617,7 +624,7 @@ export default function MarketDetailPage() {
                     animate={{ opacity: [1, 0.3, 1] }}
                     transition={{ duration: 1.2, repeat: Infinity }}
                   />
-                  Ephemeral Rollup activo
+                  {t("detail_er_active")}
                 </span>
               )}
               {isPrivate && (
@@ -625,12 +632,12 @@ export default function MarketDetailPage() {
                   className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full"
                   style={{ background: "var(--color-secondary-dim)", color: "var(--color-secondary-bright)" }}
                 >
-                  🔒 Monto privado
+                  {t("detail_private_amount")}
                 </span>
               )}
               {erLatencyMs !== null && (
                 <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full border border-white/10 text-[color:var(--color-text-dim)]">
-                  Ultima actualizacion ER: {erLatencyMs}ms
+                  {t("detail_er_last_update")} {erLatencyMs}ms
                 </span>
               )}
             </motion.div>
@@ -651,7 +658,7 @@ export default function MarketDetailPage() {
               className="text-xs font-mono mt-3"
               style={{ color: "var(--color-primary-bright)" }}
             >
-              {busyLabel || "Procesando..."}
+              {busyLabel || t("busy_processing")}
             </motion.p>
           )}
         </AnimatePresence>
@@ -665,18 +672,18 @@ export default function MarketDetailPage() {
               className="glass-card p-4 rounded-2xl mt-4 font-mono text-sm space-y-1"
             >
               <p className="text-[color:var(--color-text-dim)] text-xs uppercase tracking-widest mb-2">
-                Tu apuesta
+                {t("detail_your_bet")}
               </p>
               <p>
-                Monto:{" "}
+                {t("detail_amount_label")}{" "}
                 {isPrivate ? (
-                  <span style={{ color: "var(--color-secondary-bright)" }}>🔒 Oculto</span>
+                  <span style={{ color: "var(--color-secondary-bright)" }}>{t("detail_hidden")}</span>
                 ) : (
                   <AnimatedNumber value={bet.amount} decimals={4} suffix=" SOL" />
                 )}
               </p>
-              <p>Prediccion: {bet.predictedOutcome ? "SI" : "NO"}</p>
-              <p>{bet.claimed ? "Payout reclamado" : "Sin reclamar"}</p>
+              <p>{t("detail_prediction_label")} {bet.predictedOutcome ? t("yes") : t("no")}</p>
+              <p>{bet.claimed ? t("detail_payout_claimed") : t("detail_unclaimed")}</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -689,7 +696,7 @@ export default function MarketDetailPage() {
             className="glass-card p-4 rounded-2xl mt-4 space-y-3"
           >
             <p className="text-xs uppercase tracking-widest font-mono" style={{ color: "var(--color-primary-bright)" }}>
-              MagicBlock
+              {t("detail_magicblock_title")}
             </p>
 
             {!isLive ? (
@@ -700,12 +707,12 @@ export default function MarketDetailPage() {
                 className="w-full rounded-xl border font-mono text-sm py-3 disabled:opacity-40"
                 style={{ borderColor: "var(--color-primary)", color: "var(--color-primary-bright)" }}
               >
-                Activar tiempo real (Ephemeral Rollup)
+                {t("detail_activate_realtime")}
               </motion.button>
             ) : (
               <>
                 <p className="text-xs text-[color:var(--color-text-dim)] font-mono">
-                  Cambia tu prediccion sin friccion, dentro del rollup:
+                  {t("detail_change_prediction_hint")}
                 </p>
                 <div className="flex gap-2">
                   <motion.button
@@ -715,7 +722,7 @@ export default function MarketDetailPage() {
                     className="flex-1 rounded-xl border font-mono text-sm py-2 disabled:opacity-30"
                     style={{ borderColor: "var(--color-primary)", color: "var(--color-primary-bright)" }}
                   >
-                    Cambiar a SI
+                    {t("detail_change_to_yes")}
                   </motion.button>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
@@ -724,7 +731,7 @@ export default function MarketDetailPage() {
                     className="flex-1 rounded-xl border font-mono text-sm py-2 disabled:opacity-30"
                     style={{ borderColor: "var(--color-secondary)", color: "var(--color-secondary-bright)" }}
                   >
-                    Cambiar a NO
+                    {t("detail_change_to_no")}
                   </motion.button>
                 </div>
 
@@ -735,7 +742,7 @@ export default function MarketDetailPage() {
                     disabled={busy}
                     className="w-full rounded-xl border border-white/10 text-[color:var(--color-text-dim)] font-mono text-sm py-2.5 disabled:opacity-40"
                   >
-                    🔒 Ocultar mi monto (Private ER)
+                    {t("detail_hide_amount")}
                   </motion.button>
                 )}
 
@@ -746,7 +753,7 @@ export default function MarketDetailPage() {
                   className="w-full rounded-xl font-mono font-semibold text-sm py-2.5 disabled:opacity-40"
                   style={{ background: "var(--color-primary)", color: "#080808" }}
                 >
-                  Sincronizar a Solana
+                  {t("detail_sync_solana")}
                 </motion.button>
               </>
             )}
@@ -761,7 +768,7 @@ export default function MarketDetailPage() {
             className="glass-card p-4 rounded-2xl mt-4 space-y-3 border-dashed"
           >
             <p className="text-xs uppercase tracking-widest font-mono text-[color:var(--color-text-dim)]">
-              Resolver (solo creador)
+              {t("detail_resolve_authority")}
             </p>
             <div className="flex gap-2">
               <motion.button
@@ -771,7 +778,7 @@ export default function MarketDetailPage() {
                 className="flex-1 rounded-xl border font-mono text-sm py-2 disabled:opacity-40"
                 style={{ borderColor: "var(--color-primary)", color: "var(--color-primary-bright)" }}
               >
-                Resolver: SI
+                {t("detail_resolve_yes")}
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -780,7 +787,7 @@ export default function MarketDetailPage() {
                 className="flex-1 rounded-xl border font-mono text-sm py-2 disabled:opacity-40"
                 style={{ borderColor: "var(--color-secondary)", color: "var(--color-secondary-bright)" }}
               >
-                Resolver: NO
+                {t("detail_resolve_no")}
               </motion.button>
             </div>
             <motion.button
@@ -789,7 +796,7 @@ export default function MarketDetailPage() {
               disabled={busy}
               className="w-full rounded-xl border border-white/10 text-[color:var(--color-text-dim)] font-mono text-xs py-2.5 disabled:opacity-40"
             >
-              🎲 Resolver con azar verificable (VRF)
+              {t("detail_resolve_vrf")}
             </motion.button>
           </motion.div>
         )}
@@ -806,7 +813,7 @@ export default function MarketDetailPage() {
               className="w-full rounded-2xl font-mono font-semibold py-3 mt-4 disabled:opacity-40"
               style={{ background: "var(--color-primary)", color: "#080808" }}
             >
-              {busy ? "Procesando..." : "Reclamar payout"}
+              {busy ? t("busy_processing") : t("detail_claim_payout")}
             </motion.button>
           )}
         </AnimatePresence>
@@ -834,8 +841,8 @@ export default function MarketDetailPage() {
                     color: betOutcome ? "var(--color-primary-bright)" : "var(--color-text-dim)",
                   }}
                 >
-                  <span className="text-[9px] font-bold uppercase tracking-widest mb-0.5">Predecir</span>
-                  <span className="font-bold">SI</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest mb-0.5">{t("detail_predict")}</span>
+                  <span className="font-bold">{t("yes")}</span>
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -847,15 +854,15 @@ export default function MarketDetailPage() {
                     color: !betOutcome ? "var(--color-secondary-bright)" : "var(--color-text-dim)",
                   }}
                 >
-                  <span className="text-[9px] font-bold uppercase tracking-widest mb-0.5">Predecir</span>
-                  <span className="font-bold">NO</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest mb-0.5">{t("detail_predict")}</span>
+                  <span className="font-bold">{t("no")}</span>
                 </motion.button>
               </div>
 
               <div className="flex items-center justify-between gap-2 bg-black/40 rounded-2xl p-3 border border-white/5 mb-3">
                 <div className="flex flex-col">
                   <span className="text-[9px] uppercase font-bold text-[color:var(--color-text-dim)] mb-0.5">
-                    Tu apuesta
+                    {t("detail_your_stake_input")}
                   </span>
                   <div className="flex items-baseline gap-1">
                     <input
@@ -895,8 +902,8 @@ export default function MarketDetailPage() {
               </div>
 
               <SwipeToConfirm
-                label={`Desliza para confirmar ${betOutcome ? "SI" : "NO"}`}
-                confirmedLabel={`Apuesta ${betOutcome ? "SI" : "NO"} enviada ✓`}
+                label={`${t("detail_swipe_confirm_prefix")} ${betOutcome ? t("yes") : t("no")}`}
+                confirmedLabel={`${betOutcome ? t("yes") : t("no")} ${t("detail_bet_sent_suffix")}`}
                 color={betOutcome ? "var(--color-primary)" : "var(--color-secondary)"}
                 textColor={betOutcome ? "#080808" : "#f2f2f0"}
                 onConfirm={handlePlaceBet}
@@ -912,6 +919,8 @@ export default function MarketDetailPage() {
           {t("connect_prompt")}
         </p>
       )}
+
+      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </main>
   );
 }
