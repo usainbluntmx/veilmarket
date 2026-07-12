@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { useVeilWallet } from "@/lib/useVeilWallet";
 import { AnchorProvider, web3 } from "@coral-xyz/anchor";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -11,7 +12,7 @@ import { PageTransition } from "@/components/PageTransition";
 
 export default function NewMarketPage() {
   const { connection } = useConnection();
-  const wallet = useWallet();
+  const wallet = useVeilWallet();
   const router = useRouter();
 
   const [matchId, setMatchId] = useState("");
@@ -24,13 +25,13 @@ export default function NewMarketPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!wallet.publicKey || !wallet.signTransaction) return;
+    if (!wallet.publicKey || !wallet.wallet) return;
     setSubmitting(true);
     setError(null);
     try {
       const provider = new AnchorProvider(
         connection,
-        wallet as unknown as AnchorProvider["wallet"],
+        wallet.wallet as unknown as AnchorProvider["wallet"],
         { commitment: "confirmed" }
       );
       const program = getProgram(provider);

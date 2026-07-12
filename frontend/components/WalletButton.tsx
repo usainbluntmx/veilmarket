@@ -1,9 +1,32 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { useVeilWallet } from "@/lib/useVeilWallet";
 
-export const WalletButton = dynamic(
-  async () =>
-    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
-  { ssr: false }
-);
+export function WalletButton({ style }: { style?: React.CSSProperties }) {
+  const wallet = useVeilWallet();
+
+  if (wallet.connected && wallet.publicKey) {
+    const short = `${wallet.publicKey.toBase58().slice(0, 4)}...${wallet.publicKey
+      .toBase58()
+      .slice(-4)}`;
+    return (
+      <button
+        onClick={() => wallet.disconnect()}
+        style={style}
+        className="rounded-full px-4 font-mono"
+      >
+        {short}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => wallet.connect()}
+      style={style}
+      className="rounded-full px-4 font-mono"
+    >
+      Conectar
+    </button>
+  );
+}

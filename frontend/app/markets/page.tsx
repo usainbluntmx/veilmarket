@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { useVeilWallet } from "@/lib/useVeilWallet";
 import { AnchorProvider, BN, web3 } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
@@ -71,7 +72,7 @@ function OddsBar({ yes, no }: { yes: number; no: number }) {
 
 export default function MarketsFeedPage() {
   const { connection } = useConnection();
-  const wallet = useWallet();
+  const wallet = useVeilWallet();
   const [markets, setMarkets] = useState<MarketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -86,7 +87,7 @@ export default function MarketsFeedPage() {
     try {
       const provider = new AnchorProvider(
         connection,
-        (wallet as unknown as AnchorProvider["wallet"]) ?? ({} as never),
+        (wallet.wallet as unknown as AnchorProvider["wallet"]) ?? ({} as never),
         { commitment: "confirmed" }
       );
       const program = getProgram(provider);
@@ -108,7 +109,7 @@ export default function MarketsFeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [connection, wallet]);
+  }, [connection, wallet.publicKey?.toBase58()]);
 
   useEffect(() => {
     loadMarkets();
@@ -123,7 +124,7 @@ export default function MarketsFeedPage() {
     }
     const provider = new AnchorProvider(
       connection,
-      (wallet as unknown as AnchorProvider["wallet"]) ?? ({} as never),
+      (wallet.wallet as unknown as AnchorProvider["wallet"]) ?? ({} as never),
       { commitment: "confirmed" }
     );
     const program = getProgram(provider);
@@ -145,7 +146,7 @@ export default function MarketsFeedPage() {
     try {
       const provider = new AnchorProvider(
         connection,
-        wallet as unknown as AnchorProvider["wallet"],
+        wallet.wallet as unknown as AnchorProvider["wallet"],
         { commitment: "confirmed" }
       );
       const program = getProgram(provider);

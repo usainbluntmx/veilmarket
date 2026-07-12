@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { useVeilWallet } from "@/lib/useVeilWallet";
 import { AnchorProvider, BN, web3 } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
@@ -51,7 +52,7 @@ export default function MarketDetailPage() {
   const router = useRouter();
   const marketPubkey = new PublicKey(params.pubkey as string);
   const { connection } = useConnection();
-  const wallet = useWallet();
+  const wallet = useVeilWallet();
   const erConnection = getConnection("er");
 
   const [market, setMarket] = useState<MarketData | null>(null);
@@ -73,26 +74,26 @@ export default function MarketDetailPage() {
   const getBaseProgram = useCallback(() => {
     const provider = new AnchorProvider(
       connection,
-      wallet as unknown as AnchorProvider["wallet"],
+      wallet.wallet as unknown as AnchorProvider["wallet"],
       { commitment: "confirmed" }
     );
     return getProgram(provider);
-  }, [connection, wallet]);
+  }, [connection, wallet.publicKey?.toBase58()]);
 
   const getErProgram = useCallback(() => {
     const provider = new AnchorProvider(
       erConnection,
-      wallet as unknown as AnchorProvider["wallet"],
+      wallet.wallet as unknown as AnchorProvider["wallet"],
       { commitment: "confirmed" }
     );
     return getProgram(provider);
-  }, [erConnection, wallet]);
+  }, [erConnection, wallet.publicKey?.toBase58()]);
 
   const load = useCallback(async () => {
     try {
       const provider = new AnchorProvider(
         connection,
-        (wallet as unknown as AnchorProvider["wallet"]) ?? ({} as never),
+        (wallet.wallet as unknown as AnchorProvider["wallet"]) ?? ({} as never),
         { commitment: "confirmed" }
       );
       const program = getProgram(provider);
@@ -144,7 +145,7 @@ export default function MarketDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [connection, wallet, marketPubkey]);
+  }, [connection, wallet.publicKey?.toBase58(), marketPubkey]);
 
   useEffect(() => {
     load();

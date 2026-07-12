@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { useVeilWallet } from "@/lib/useVeilWallet";
 import { AnchorProvider, web3 } from "@coral-xyz/anchor";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -32,8 +32,7 @@ const steps = [
 
 export default function LandingPage() {
   const { connection } = useConnection();
-  const wallet = useWallet();
-  const { setVisible } = useWalletModal();
+  const wallet = useVeilWallet();
   const router = useRouter();
 
   const [balance, setBalance] = useState<number | null>(null);
@@ -42,9 +41,16 @@ export default function LandingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
-  const wasConnected = useRef(false);
+  const wasConnected = useRef<boolean | null>(null);
 
   useEffect(() => {
+    // Primera vez que corre este efecto tras montar: solo registramos el
+    // estado actual, sin disparar el overlay (evita que se repita cada
+    // vez que vuelves a "/" ya estando conectado desde antes).
+    if (wasConnected.current === null) {
+      wasConnected.current = wallet.connected;
+      return;
+    }
     if (wallet.connected && !wasConnected.current) {
       setShowWelcome(true);
       const t = setTimeout(() => setShowWelcome(false), 1400);
@@ -68,14 +74,20 @@ export default function LandingPage() {
   const canSubmit =
     wallet.connected && matchId.trim().length > 0 && question.trim().length > 0;
 
+  // El modal de Reown AppKit ya ofrece Phantom/Solflare + email + redes
+  // sociales en un solo lugar, asi que aqui solo abrimos ese modal.
+  function handleQuickConnect() {
+    wallet.connect();
+  }
+
   async function handleCreateMarket() {
-    if (!wallet.publicKey || !wallet.signTransaction) return;
+    if (!wallet.publicKey || !wallet.wallet) return;
     setSubmitting(true);
     setError(null);
     try {
       const provider = new AnchorProvider(
         connection,
-        wallet as unknown as AnchorProvider["wallet"],
+        wallet.wallet as unknown as AnchorProvider["wallet"],
         { commitment: "confirmed" }
       );
       const program = getProgram(provider);
@@ -140,7 +152,7 @@ export default function LandingPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setVisible(true)}
+              onClick={handleQuickConnect}
               className="text-xs font-mono px-4 py-2 rounded-full bg-[color:var(--color-primary)] text-[#080808] font-semibold"
             >
               Conectar
@@ -213,7 +225,7 @@ export default function LandingPage() {
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => setVisible(true)}
+                  onClick={handleQuickConnect}
                   className="w-full py-4 rounded-2xl font-mono font-semibold text-sm glow-primary active:scale-95 transition-all"
                   style={{
                     background:
@@ -390,7 +402,7 @@ export default function LandingPage() {
             {!wallet.connected ? (
               <motion.button
                 whileTap={{ scale: 0.97 }}
-                onClick={() => setVisible(true)}
+                onClick={handleQuickConnect}
                 className="w-full py-4 rounded-2xl font-mono font-semibold text-sm relative z-10 glow-primary"
                 style={{
                   background: "var(--color-secondary)",

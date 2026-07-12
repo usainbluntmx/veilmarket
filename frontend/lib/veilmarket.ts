@@ -2,7 +2,12 @@ import { AnchorProvider, Program, Idl } from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import idl from "./idl/veilmarket.json";
 
-export const SOLANA_DEVNET = "https://api.devnet.solana.com";
+// IMPORTANTE: el RPC publico de Solana devnet tiene rate-limits muy
+// agresivos (429 Too Many Requests) bajo uso normal de la app. Reemplaza
+// esta URL con tu endpoint de Helius (gratis, https://dashboard.helius.dev):
+// "https://devnet.helius-rpc.com/?api-key=TU_API_KEY"
+export const SOLANA_DEVNET =
+  process.env.NEXT_PUBLIC_SOLANA_RPC ?? "https://api.devnet.solana.com";
 export const ER_DEVNET = "https://devnet.magicblock.app";
 
 export const PROGRAM_ID = new PublicKey(

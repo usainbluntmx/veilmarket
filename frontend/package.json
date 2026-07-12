@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
+    "@reown/appkit": "^1.8.22",
+    "@reown/appkit-adapter-solana": "^1.8.22",
     "@solana-mobile/wallet-adapter-mobile": "^2.2.9",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",

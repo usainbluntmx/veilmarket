@@ -1,44 +1,15 @@
 "use client";
 
-import { FC, ReactNode, useMemo } from "react";
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { SolanaMobileWalletAdapter, createDefaultAuthorizationResultCache, createDefaultAddressSelector, createDefaultWalletNotFoundHandler } from "@solana-mobile/wallet-adapter-mobile";
+import { ReactNode } from "react";
+import { ConnectionProvider } from "@solana/wallet-adapter-react";
+import "@/lib/reown-appkit"; // side-effect: inicializa createAppKit() una sola vez
+import { SOLANA_DEVNET } from "@/lib/veilmarket";
 
-import "@solana/wallet-adapter-react-ui/styles.css";
-
-const SOLANA_DEVNET_RPC = "https://api.devnet.solana.com";
-
-export const WalletContextProvider: FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const endpoint = SOLANA_DEVNET_RPC;
-
-  const wallets = useMemo(
-    () => [
-      new SolanaMobileWalletAdapter({
-        addressSelector: createDefaultAddressSelector(),
-        appIdentity: {
-          name: "VeilMarket",
-          uri: typeof window !== "undefined" ? window.location.origin : "",
-          icon: "/icon.png",
-        },
-        authorizationResultCache: createDefaultAuthorizationResultCache(),
-        cluster: "devnet",
-        onWalletNotFound: createDefaultWalletNotFoundHandler(),
-      }),
-    ],
-    []
-  );
-
+export function WalletContextProvider({ children }: { children: ReactNode }) {
+  // Mantenemos ConnectionProvider solo para el objeto `connection` que ya
+  // usan todas las paginas via useConnection(). La seleccion/conexion de
+  // wallet ahora la maneja Reown AppKit (ver lib/reown-appkit.ts).
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={false}>
-        <WalletModalProvider>{children}</WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <ConnectionProvider endpoint={SOLANA_DEVNET}>{children}</ConnectionProvider>
   );
-};
+}

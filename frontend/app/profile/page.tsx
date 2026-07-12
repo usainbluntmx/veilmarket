@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { useVeilWallet } from "@/lib/useVeilWallet";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -22,7 +23,7 @@ type Stats = {
 
 export default function ProfilePage() {
   const { connection } = useConnection();
-  const wallet = useWallet();
+  const wallet = useVeilWallet();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [copied, setCopied] = useState(false);
@@ -36,7 +37,7 @@ export default function ProfilePage() {
     try {
       const provider = new AnchorProvider(
         connection,
-        wallet as unknown as AnchorProvider["wallet"],
+        wallet.wallet as unknown as AnchorProvider["wallet"],
         { commitment: "confirmed" }
       );
       const program = getProgram(provider);
@@ -94,7 +95,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [connection, wallet]);
+  }, [connection, wallet.publicKey?.toBase58()]);
 
   useEffect(() => {
     load();
