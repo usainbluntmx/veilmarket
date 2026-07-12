@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useVeilWallet } from "@/lib/useVeilWallet";
+import { useLanguage } from "@/lib/i18n";
 import { AnchorProvider, BN, web3 } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
@@ -23,6 +24,7 @@ import {
 } from "@/lib/veilmarket";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { SwipeToConfirm } from "@/components/SwipeToConfirm";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 type MarketData = {
   authority: PublicKey;
@@ -54,6 +56,7 @@ export default function MarketDetailPage() {
   const marketPubkey = new PublicKey(params.pubkey as string);
   const { connection } = useConnection();
   const wallet = useVeilWallet();
+  const { t } = useLanguage();
   const erConnection = getConnection("er");
 
   const [market, setMarket] = useState<MarketData | null>(null);
@@ -482,13 +485,23 @@ export default function MarketDetailPage() {
         <span className="font-mono text-[10px] uppercase tracking-widest text-[color:var(--color-text-dim)]">
           {market.matchId}
         </span>
-        <div
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border"
-          style={{ background: "var(--color-primary-dim)", borderColor: "var(--color-primary)" }}
-        >
-          <span className="font-mono text-xs" style={{ color: "var(--color-primary-bright)" }}>
-            {walletBalance !== null ? `${walletBalance.toFixed(2)} SOL` : "—"}
-          </span>
+        <div className="flex items-center gap-1.5">
+          <LanguageToggle
+            style={{
+              backgroundColor: "var(--color-surface-high)",
+              color: "var(--color-text)",
+              borderColor: "var(--color-border)",
+              height: "30px",
+            }}
+          />
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border"
+            style={{ background: "var(--color-primary-dim)", borderColor: "var(--color-primary)" }}
+          >
+            <span className="font-mono text-xs" style={{ color: "var(--color-primary-bright)" }}>
+              {walletBalance !== null ? `${walletBalance.toFixed(2)} SOL` : "—"}
+            </span>
+          </div>
         </div>
       </nav>
 
@@ -896,7 +909,7 @@ export default function MarketDetailPage() {
 
       {!wallet.connected && (
         <p className="fixed bottom-6 left-0 w-full text-center text-xs font-mono text-[color:var(--color-text-dim)] z-40 px-5">
-          Conecta tu wallet para apostar o gestionar este mercado.
+          {t("connect_prompt")}
         </p>
       )}
     </main>

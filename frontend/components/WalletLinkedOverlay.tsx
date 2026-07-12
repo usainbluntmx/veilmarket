@@ -2,7 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 
-export function WalletLinkedOverlay({ visible }: { visible: boolean }) {
+export function WalletLinkedOverlay({
+  visible,
+  title = "Wallet connected",
+  subtitle = "Welcome to the future of predictions.",
+}: {
+  visible: boolean;
+  title?: string;
+  subtitle?: string;
+}) {
   return (
     <AnimatePresence>
       {visible && (
@@ -32,9 +40,9 @@ export function WalletLinkedOverlay({ visible }: { visible: boolean }) {
             >
               ✓
             </motion.div>
-            <h2 className="text-lg font-bold text-center">Wallet conectada</h2>
+            <h2 className="text-lg font-bold text-center">{title}</h2>
             <p className="text-sm text-[color:var(--color-text-dim)] text-center max-w-[220px]">
-              Bienvenido al futuro de las predicciones.
+              {subtitle}
             </p>
           </motion.div>
         </motion.div>

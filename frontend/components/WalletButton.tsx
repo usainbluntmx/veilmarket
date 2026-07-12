@@ -1,9 +1,11 @@
 "use client";
 
 import { useVeilWallet } from "@/lib/useVeilWallet";
+import { useLanguage } from "@/lib/i18n";
 
 export function WalletButton({ style }: { style?: React.CSSProperties }) {
   const wallet = useVeilWallet();
+  const { t } = useLanguage();
 
   if (wallet.connected && wallet.publicKey) {
     const short = `${wallet.publicKey.toBase58().slice(0, 4)}...${wallet.publicKey
@@ -26,7 +28,7 @@ export function WalletButton({ style }: { style?: React.CSSProperties }) {
       style={style}
       className="rounded-full px-4 font-mono"
     >
-      Conectar
+      {t("connect")}
     </button>
   );
 }

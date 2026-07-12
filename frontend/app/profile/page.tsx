@@ -3,11 +3,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useVeilWallet } from "@/lib/useVeilWallet";
+import { useLanguage } from "@/lib/i18n";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { getProgram, fetchBetsForWallet } from "@/lib/veilmarket";
 import { WalletButton } from "@/components/WalletButton";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 
 type Stats = {
@@ -24,6 +26,7 @@ type Stats = {
 export default function ProfilePage() {
   const { connection } = useConnection();
   const wallet = useVeilWallet();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [copied, setCopied] = useState(false);
@@ -135,16 +138,26 @@ export default function ProfilePage() {
         <Link href="/" className="font-bold text-base tracking-tight" style={{ color: "var(--color-primary)" }}>
           VeilMarket
         </Link>
-        <WalletButton
-          style={{
-            backgroundColor: "var(--color-surface-high)",
-            color: "var(--color-text)",
-            border: "1px solid var(--color-border)",
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
-            height: "34px",
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <LanguageToggle
+            style={{
+              backgroundColor: "var(--color-surface-high)",
+              color: "var(--color-text)",
+              borderColor: "var(--color-border)",
+              height: "34px",
+            }}
+          />
+          <WalletButton
+            style={{
+              backgroundColor: "var(--color-surface-high)",
+              color: "var(--color-text)",
+              border: "1px solid var(--color-border)",
+              fontFamily: "var(--font-mono)",
+              fontSize: "12px",
+              height: "34px",
+            }}
+          />
+        </div>
       </header>
 
       <div className="pt-24 px-5">
@@ -302,18 +315,18 @@ export default function ProfilePage() {
       <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 safe-pb pt-2 glass-card-solid rounded-t-2xl">
         <Link href="/markets" className="flex flex-col items-center justify-center text-[color:var(--color-text-dim)]">
           <span className="text-lg">🧭</span>
-          <span className="text-[10px] font-mono">Explorar</span>
+          <span className="text-[10px] font-mono">{t("nav_explore")}</span>
         </Link>
         <Link href="/portfolio" className="flex flex-col items-center justify-center text-[color:var(--color-text-dim)]">
           <span className="text-lg">💼</span>
-          <span className="text-[10px] font-mono">Portafolio</span>
+          <span className="text-[10px] font-mono">{t("nav_portfolio")}</span>
         </Link>
         <div
           className="flex flex-col items-center justify-center rounded-full px-4 py-1"
           style={{ background: "var(--color-primary-dim)", color: "var(--color-primary-bright)" }}
         >
           <span className="text-lg">👤</span>
-          <span className="text-[10px] font-mono">Perfil</span>
+          <span className="text-[10px] font-mono">{t("nav_profile")}</span>
         </div>
       </nav>
     </main>

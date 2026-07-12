@@ -3,12 +3,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useVeilWallet } from "@/lib/useVeilWallet";
+import { useLanguage } from "@/lib/i18n";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import Link from "next/link";
 import { getProgram, fetchMarketOdds } from "@/lib/veilmarket";
 import { WalletButton } from "@/components/WalletButton";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 type MarketRow = {
   pubkey: string;
@@ -40,15 +42,25 @@ function gradientFor(matchId: string): string {
   return `linear-gradient(160deg, hsla(${hue},70%,25%,0.55), hsla(${(hue + 70) % 360},70%,15%,0.85))`;
 }
 
-function OddsBar({ yes, no }: { yes: number; no: number }) {
+function OddsBar({
+  yes,
+  no,
+  labelOdds,
+  labelNoBets,
+}: {
+  yes: number;
+  no: number;
+  labelOdds: string;
+  labelNoBets: string;
+}) {
   const total = yes + no;
   const yesPct = total > 0 ? Math.round((yes / total) * 100) : 50;
   return (
     <div>
       <div className="flex justify-between items-center mb-1.5 font-mono text-xs">
-        <span className="text-[color:var(--color-text-dim)]">Odds actuales</span>
+        <span className="text-[color:var(--color-text-dim)]">{labelOdds}</span>
         <span style={{ color: "var(--color-primary-bright)" }}>
-          {total > 0 ? `${yesPct}% SI` : "Sin apuestas aun"}
+          {total > 0 ? `${yesPct}% YES` : labelNoBets}
         </span>
       </div>
       <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden flex">
@@ -73,6 +85,7 @@ const SWIPE_VELOCITY_THRESHOLD = 400;
 export default function MarketsFeedPage() {
   const { connection } = useConnection();
   const wallet = useVeilWallet();
+  const { t } = useLanguage();
   const [markets, setMarkets] = useState<MarketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -145,37 +158,47 @@ export default function MarketsFeedPage() {
         <Link href="/" className="font-bold text-base tracking-tight" style={{ color: "var(--color-primary)" }}>
           VeilMarket
         </Link>
-        <WalletButton
-          style={{
-            backgroundColor: "var(--color-surface-high)",
-            color: "var(--color-text)",
-            border: "1px solid var(--color-border)",
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
-            height: "34px",
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <LanguageToggle
+            style={{
+              backgroundColor: "var(--color-surface-high)",
+              color: "var(--color-text)",
+              borderColor: "var(--color-border)",
+              height: "34px",
+            }}
+          />
+          <WalletButton
+            style={{
+              backgroundColor: "var(--color-surface-high)",
+              color: "var(--color-text)",
+              border: "1px solid var(--color-border)",
+              fontFamily: "var(--font-mono)",
+              fontSize: "12px",
+              height: "34px",
+            }}
+          />
+        </div>
       </header>
 
       {/* Canvas central */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 pt-16 pb-36 relative overflow-y-auto">
         {loading && (
           <p className="font-mono text-sm text-[color:var(--color-text-dim)]">
-            Cargando mercados...
+            {t("feed_loading")}
           </p>
         )}
 
         {!loading && markets.length === 0 && (
           <div className="glass-card rounded-3xl p-6 text-center max-w-sm">
             <p className="text-sm text-[color:var(--color-text-dim)] mb-4">
-              Aun no hay mercados. Crea el primero.
+              {t("feed_empty")}
             </p>
             <Link
               href="/"
               className="inline-block text-xs font-mono px-4 py-2 rounded-full"
               style={{ background: "var(--color-primary)", color: "#080808" }}
             >
-              Crear mercado
+              {t("feed_create_market")}
             </Link>
           </div>
         )}
@@ -236,7 +259,7 @@ export default function MarketsFeedPage() {
                         {!current.resolved && (
                           <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                         )}
-                        {current.resolved ? "RESUELTO" : "EN VIVO"}
+                        {current.resolved ? t("feed_resolved") : t("feed_live")}
                       </span>
                       <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
                         {current.matchId}
@@ -250,7 +273,7 @@ export default function MarketsFeedPage() {
                     <div className="flex justify-between items-end pt-1">
                       <div className="flex flex-col">
                         <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
-                          Volumen
+                          {t("feed_volume")}
                         </span>
                         <span className="text-white font-mono text-sm">
                           {current.totalPool.toFixed(3)} SOL
@@ -258,7 +281,7 @@ export default function MarketsFeedPage() {
                       </div>
                     </div>
 
-                    {odds && <OddsBar yes={odds.yesLamports} no={odds.noLamports} />}
+                    {odds && <OddsBar yes={odds.yesLamports} no={odds.noLamports} labelOdds={t("feed_odds_current")} labelNoBets={t("feed_no_bets_yet")} />}
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -271,12 +294,12 @@ export default function MarketsFeedPage() {
                 className="w-full text-center rounded-2xl py-3.5 font-mono text-sm font-semibold"
                 style={{ background: "var(--color-primary)", color: "#080808" }}
               >
-                Ver detalle y apostar →
+                {t("feed_view_detail")}
               </motion.div>
             </Link>
 
             <p className="mt-4 text-[11px] font-mono text-[color:var(--color-text-faint)] text-center">
-              Desliza arriba/abajo para explorar · {index + 1} / {markets.length}
+              {t("feed_swipe_hint")} · {index + 1} / {markets.length}
             </p>
           </div>
         )}
@@ -289,28 +312,28 @@ export default function MarketsFeedPage() {
           style={{ background: "var(--color-primary-dim)", color: "var(--color-primary-bright)" }}
         >
           <span className="text-lg">🧭</span>
-          <span className="text-[10px] font-mono">Explorar</span>
+          <span className="text-[10px] font-mono">{t("nav_explore")}</span>
         </div>
         <Link
           href="/portfolio"
           className="flex flex-col items-center justify-center text-[color:var(--color-text-dim)]"
         >
           <span className="text-lg">💼</span>
-          <span className="text-[10px] font-mono">Portafolio</span>
+          <span className="text-[10px] font-mono">{t("nav_portfolio")}</span>
         </Link>
         <Link
           href="/"
           className="flex flex-col items-center justify-center text-[color:var(--color-text-dim)]"
         >
           <span className="text-lg">➕</span>
-          <span className="text-[10px] font-mono">Crear</span>
+          <span className="text-[10px] font-mono">{t("nav_create")}</span>
         </Link>
         <Link
           href="/profile"
           className="flex flex-col items-center justify-center text-[color:var(--color-text-dim)]"
         >
           <span className="text-lg">👤</span>
-          <span className="text-[10px] font-mono">Perfil</span>
+          <span className="text-[10px] font-mono">{t("nav_profile")}</span>
         </Link>
       </nav>
     </main>
