@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export type ToastState = { message: string; kind: "success" | "error" } | null;
@@ -14,11 +14,20 @@ export function Toast({
   onDismiss: () => void;
   duration?: number;
 }) {
+  // onDismiss suele llegar como funcion inline desde el padre (nueva
+  // referencia en cada render). Si el efecto dependiera de ella
+  // directamente, cada re-render del padre reiniciaria el timer antes
+  // de que se cumpliera, y el toast nunca se desvanecia. La guardamos
+  // en un ref para que el efecto solo dependa de `toast` de verdad.
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
+
   useEffect(() => {
     if (!toast) return;
-    const timer = setTimeout(onDismiss, duration);
+    const timer = setTimeout(() => onDismissRef.current(), duration);
     return () => clearTimeout(timer);
-  }, [toast, duration, onDismiss]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toast, duration]);
 
   return (
     <AnimatePresence>
