@@ -1,0 +1,1295 @@
+{
+  "address": "2EAgovXRWjb5Vxmt4N3PNrWNDSt3AhvcLwUAPzkMsBLq",
+  "metadata": {
+    "name": "veilmarket",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "claim_payout",
+      "docs": [
+        "Libera el pago pari-mutuel al apostador ganador:",
+        "payout = tu_apuesta * pool_total / pool_ganador"
+      ],
+      "discriminator": [
+        127,
+        240,
+        132,
+        62,
+        227,
+        198,
+        146,
+        133
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        },
+        {
+          "name": "better",
+          "writable": true,
+          "relations": [
+            "bet"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_bet_permission",
+      "docs": [
+        "Cierra el EphemeralPermission en el ER, devolviendo el rent a la",
+        "PDA de Bet. Opcional, util antes de undelegate si se quiere limpiar."
+      ],
+      "discriminator": [
+        197,
+        3,
+        211,
+        206,
+        208,
+        136,
+        5,
+        153
+      ],
+      "accounts": [
+        {
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bet.market",
+                "account": "Bet"
+              },
+              {
+                "kind": "account",
+                "path": "bet.better",
+                "account": "Bet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "permission",
+          "writable": true
+        },
+        {
+          "name": "ephemeral_vault",
+          "writable": true
+        },
+        {
+          "name": "magic_program"
+        },
+        {
+          "name": "permission_program",
+          "address": "ACLseoPoyC3cBqoUtkbjZ4aDrkurZW86v19pXz2XQnp1"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "commit_bet",
+      "docs": [
+        "Commit manual del estado de Bet desde el ER hacia la capa base."
+      ],
+      "discriminator": [
+        111,
+        3,
+        143,
+        39,
+        141,
+        158,
+        225,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "commit_market",
+      "docs": [
+        "Commit manual del estado del mercado desde el ER hacia la capa base."
+      ],
+      "discriminator": [
+        155,
+        54,
+        116,
+        248,
+        97,
+        212,
+        7,
+        212
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_bet",
+      "docs": [
+        "Crea la cuenta Bet Y transfiere los lamports apostados al vault (Market).",
+        "Debe correr en la capa base (ANTES de delegar), porque mover SOL real",
+        "requiere una CPI al System Program, algo que no se hace dentro del ER."
+      ],
+      "discriminator": [
+        197,
+        42,
+        153,
+        2,
+        59,
+        63,
+        143,
+        246
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "better"
+              }
+            ]
+          }
+        },
+        {
+          "name": "better",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "predicted_outcome",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "create_market",
+      "docs": [
+        "Crea un mercado de predicción para un partido/evento del Mundial 2026."
+      ],
+      "discriminator": [
+        103,
+        226,
+        97,
+        235,
+        200,
+        188,
+        251,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "match_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "match_id",
+          "type": "string"
+        },
+        {
+          "name": "question",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "delegate_bet",
+      "docs": [
+        "Delega Bet al Ephemeral Rollup. Debe llamarse despues de create_bet",
+        "y antes de place_bet si se quiere apostar dentro del ER."
+      ],
+      "discriminator": [
+        55,
+        176,
+        95,
+        121,
+        115,
+        103,
+        253,
+        251
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                18,
+                59,
+                48,
+                153,
+                243,
+                166,
+                52,
+                80,
+                134,
+                95,
+                159,
+                220,
+                38,
+                245,
+                54,
+                192,
+                214,
+                244,
+                38,
+                35,
+                92,
+                2,
+                144,
+                120,
+                225,
+                221,
+                104,
+                53,
+                169,
+                212,
+                253,
+                22
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true
+        },
+        {
+          "name": "owner_program",
+          "address": "2EAgovXRWjb5Vxmt4N3PNrWNDSt3AhvcLwUAPzkMsBLq"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "market",
+          "type": "pubkey"
+        },
+        {
+          "name": "better",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "delegate_market",
+      "docs": [
+        "Delega Market al Ephemeral Rollup."
+      ],
+      "discriminator": [
+        223,
+        125,
+        110,
+        148,
+        99,
+        176,
+        143,
+        72
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                18,
+                59,
+                48,
+                153,
+                243,
+                166,
+                52,
+                80,
+                134,
+                95,
+                159,
+                220,
+                38,
+                245,
+                54,
+                192,
+                214,
+                244,
+                38,
+                35,
+                92,
+                2,
+                144,
+                120,
+                225,
+                221,
+                104,
+                53,
+                169,
+                212,
+                253,
+                22
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true
+        },
+        {
+          "name": "owner_program",
+          "address": "2EAgovXRWjb5Vxmt4N3PNrWNDSt3AhvcLwUAPzkMsBLq"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "match_id",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "init_bet_permission",
+      "docs": [
+        "Crea el EphemeralPermission de Bet directamente en el ER. El payer es",
+        "la propia PDA de Bet (ya delegada), que firma via sus program seeds.",
+        "Idempotente: si el permiso ya existe, no hace nada. Empieza publico;",
+        "se activa la privacidad con set_bet_privacy."
+      ],
+      "discriminator": [
+        208,
+        251,
+        17,
+        30,
+        240,
+        10,
+        132,
+        156
+      ],
+      "accounts": [
+        {
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bet.market",
+                "account": "Bet"
+              },
+              {
+                "kind": "account",
+                "path": "bet.better",
+                "account": "Bet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "permission",
+          "writable": true
+        },
+        {
+          "name": "ephemeral_vault",
+          "writable": true
+        },
+        {
+          "name": "magic_program"
+        },
+        {
+          "name": "permission_program",
+          "address": "ACLseoPoyC3cBqoUtkbjZ4aDrkurZW86v19pXz2XQnp1"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "process_undelegation",
+      "discriminator": [
+        196,
+        28,
+        41,
+        206,
+        48,
+        37,
+        51,
+        167
+      ],
+      "accounts": [
+        {
+          "name": "base_account",
+          "writable": true
+        },
+        {
+          "name": "buffer"
+        },
+        {
+          "name": "payer",
+          "writable": true
+        },
+        {
+          "name": "system_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "account_seeds",
+          "type": {
+            "vec": "bytes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "request_random_resolution",
+      "docs": [
+        "Resolucion alternativa via VRF: pide un numero aleatorio verificable",
+        "a los oraculos de MagicBlock para decidir el outcome (coin-flip",
+        "justo). Util para mercados de \"puro azar\" o como desempate cuando",
+        "el resultado real es disputado. Solo la autoridad puede solicitarlo."
+      ],
+      "discriminator": [
+        244,
+        82,
+        211,
+        110,
+        72,
+        46,
+        231,
+        124
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "oracle_queue",
+          "writable": true,
+          "address": "Cuj97ggrhhidhbu39TijNVqE74xvKJ69gDervRUXAxGh"
+        },
+        {
+          "name": "program_identity",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  100,
+                  101,
+                  110,
+                  116,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "vrf_program",
+          "address": "Vrf1RNUjXmQGjmQrQLvJHs9SNkvDJEsRVFPkfSQUwGz"
+        },
+        {
+          "name": "slot_hashes",
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "client_seed",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "resolve_market",
+      "docs": [
+        "Resuelve el mercado. Solo la autoridad (creador) puede resolver."
+      ],
+      "discriminator": [
+        155,
+        23,
+        80,
+        173,
+        46,
+        74,
+        23,
+        239
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "outcome",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "resolve_market_random_callback",
+      "docs": [
+        "Consume la randomness verificable y resuelve el mercado con un",
+        "coin-flip justo: bit menos significativo del byte aleatorio decide",
+        "el outcome. Solo puede ser llamado por el programa VRF via CPI."
+      ],
+      "discriminator": [
+        222,
+        77,
+        112,
+        65,
+        88,
+        252,
+        155,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "vrf_program_identity",
+          "docs": [
+            "Verifica que quien llama es el programa VRF de MagicBlock via CPI,",
+            "usando la identidad \"scoped\" (vinculada a este programa), que es",
+            "el mecanismo recomendado actualmente (VRF_PROGRAM_IDENTITY global",
+            "esta deprecado)."
+          ],
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "randomness",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_bet_privacy",
+      "docs": [
+        "Activa/desactiva la privacidad del monto de la apuesta en el ER.",
+        "Cuando es privada, solo el apostador (`bet.better`) puede leer el",
+        "estado (logs, mensajes, balances) via el TEE; cualquier otra wallet",
+        "queda bloqueada en el ingreso."
+      ],
+      "discriminator": [
+        68,
+        179,
+        91,
+        32,
+        238,
+        211,
+        187,
+        247
+      ],
+      "accounts": [
+        {
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bet.market",
+                "account": "Bet"
+              },
+              {
+                "kind": "account",
+                "path": "bet.better",
+                "account": "Bet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "permission",
+          "writable": true
+        },
+        {
+          "name": "ephemeral_vault",
+          "writable": true
+        },
+        {
+          "name": "magic_program"
+        },
+        {
+          "name": "permission_program",
+          "address": "ACLseoPoyC3cBqoUtkbjZ4aDrkurZW86v19pXz2XQnp1"
+        }
+      ],
+      "args": [
+        {
+          "name": "is_private",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "settle_bet",
+      "docs": [
+        "Registra una apuesta ganadora en el pool ganador acumulado.",
+        "Debe llamarse una vez por Bet, despues de resolve_market y antes",
+        "de claim_payout, para poder calcular el reparto pari-mutuel."
+      ],
+      "discriminator": [
+        115,
+        55,
+        234,
+        177,
+        227,
+        4,
+        10,
+        67
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "undelegate_bet",
+      "docs": [
+        "Commit + undelegate de Bet: necesario antes de settle_bet/claim_payout",
+        "si la apuesta fue delegada al ER (por privacidad o por votar en vivo)."
+      ],
+      "discriminator": [
+        97,
+        183,
+        75,
+        35,
+        184,
+        36,
+        149,
+        38
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "undelegate_market",
+      "docs": [
+        "Commit + undelegate: cierra la sesión ER y devuelve el estado final a Solana."
+      ],
+      "discriminator": [
+        22,
+        56,
+        12,
+        119,
+        64,
+        238,
+        106,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_prediction",
+      "docs": [
+        "Cambia tu prediccion mientras el mercado sigue abierto. Pura mutacion,",
+        "sin mover fondos: ideal para ejecutarse dentro del ER (rapido, gasless)."
+      ],
+      "discriminator": [
+        22,
+        85,
+        122,
+        238,
+        83,
+        45,
+        89,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        },
+        {
+          "name": "better",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_predicted_outcome",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Bet",
+      "discriminator": [
+        147,
+        23,
+        35,
+        59,
+        15,
+        75,
+        155,
+        32
+      ]
+    },
+    {
+      "name": "Market",
+      "discriminator": [
+        219,
+        190,
+        213,
+        55,
+        0,
+        227,
+        198,
+        154
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "MatchIdTooLong",
+      "msg": "match_id no puede exceder 32 caracteres"
+    },
+    {
+      "code": 6001,
+      "name": "QuestionTooLong",
+      "msg": "question no puede exceder 200 caracteres"
+    },
+    {
+      "code": 6002,
+      "name": "MarketAlreadyResolved",
+      "msg": "El mercado ya fue resuelto"
+    },
+    {
+      "code": 6003,
+      "name": "MarketNotResolved",
+      "msg": "El mercado aun no ha sido resuelto"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidAmount",
+      "msg": "Monto de apuesta invalido"
+    },
+    {
+      "code": 6005,
+      "name": "Overflow",
+      "msg": "Overflow al sumar al pool"
+    },
+    {
+      "code": 6006,
+      "name": "Unauthorized",
+      "msg": "No autorizado"
+    },
+    {
+      "code": 6007,
+      "name": "AlreadyClaimed",
+      "msg": "Este payout ya fue reclamado"
+    },
+    {
+      "code": 6008,
+      "name": "BetAlreadyPlaced",
+      "msg": "Ya se coloco una apuesta en esta cuenta Bet"
+    },
+    {
+      "code": 6009,
+      "name": "LosingBet",
+      "msg": "La apuesta no fue ganadora"
+    },
+    {
+      "code": 6010,
+      "name": "BetAlreadySettled",
+      "msg": "Esta apuesta ya fue registrada en el settlement"
+    },
+    {
+      "code": 6011,
+      "name": "BetNotSettled",
+      "msg": "Esta apuesta aun no ha sido registrada via settle_bet"
+    },
+    {
+      "code": 6012,
+      "name": "NoWinners",
+      "msg": "No hay ganadores en este mercado"
+    }
+  ],
+  "types": [
+    {
+      "name": "Bet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "better",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "predicted_outcome",
+            "type": "bool"
+          },
+          {
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Market",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "match_id",
+            "type": "string"
+          },
+          {
+            "name": "question",
+            "type": "string"
+          },
+          {
+            "name": "resolved",
+            "type": "bool"
+          },
+          {
+            "name": "outcome",
+            "type": "bool"
+          },
+          {
+            "name": "total_pool",
+            "type": "u64"
+          },
+          {
+            "name": "winning_pool",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #080808;
+  --color-surface: #131313;
+  --color-surface-raised: #1c1b1b;
+  --color-surface-high: #2a2a2a;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.18);
+
+  /* Paleta principal: verde Solana + violeta */
+  --color-primary: #14f195;
+  --color-primary-bright: #56ffa8;
+  --color-primary-dim: rgba(20, 241, 149, 0.12);
+  --color-primary-dim-2: rgba(20, 241, 149, 0.22);
+
+  --color-secondary: #9945ff;
+  --color-secondary-bright: #d8b9ff;
+  --color-secondary-dim: rgba(153, 69, 255, 0.14);
+
+  --color-text: #e5e2e1;
+  --color-text-dim: #9a9a97;
+  --color-text-faint: #6b6b68;
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Alias de compatibilidad hacia atras: paginas construidas con los
+     nombres viejos (negro+amarillo) ahora apuntan a la nueva paleta
+     verde/violeta, sin necesidad de reescribirlas. */
+  --color-yellow: var(--color-primary);
+  --color-yellow-bright: var(--color-primary-bright);
+  --color-yellow-dim: var(--color-primary-dim);
+  --color-yellow-dim-2: var(--color-secondary-dim);
+  --color-mint: var(--color-primary);
+  --color-mint-dim: var(--color-primary-dim);
+  --color-field: var(--color-secondary-bright);
+  --color-field-dim: var(--color-secondary-dim);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: #080808;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+input,
+textarea,
+select {
+  color: var(--color-text);
+  caret-color: var(--color-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-faint);
+  opacity: 1;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-surface) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Vidrio esmerilado, reutilizable en toda la app */
+.glass-card {
+  background: rgba(18, 18, 18, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.glow-primary {
+  box-shadow: 0 0 24px rgba(20, 241, 149, 0.25);
+}
+
+.blob {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 9999px;
+  filter: blur(40px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Sobreescritura del boton default de wallet-adapter */
+.wallet-adapter-button {
+  font-family: var(--font-mono) !important;
+}
+.wallet-adapter-modal-wrapper {
+  background: var(--color-surface) !important;
+}
+.wallet-adapter-modal-button-close {
+  background: var(--color-surface-raised) !important;
+}
+.wallet-adapter-modal-title {
+  color: var(--color-text) !important;
+}
+.wallet-adapter-dropdown-list {
+  background: var(--color-surface-raised) !important;
+}
+.wallet-adapter-dropdown-list-item {
+  color: var(--color-text) !important;
+}
