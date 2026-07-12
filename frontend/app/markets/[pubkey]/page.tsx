@@ -22,6 +22,7 @@ import {
   PERMISSION_PROGRAM_ID,
 } from "@/lib/veilmarket";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { SwipeToConfirm } from "@/components/SwipeToConfirm";
 
 type MarketData = {
   authority: PublicKey;
@@ -880,18 +881,14 @@ export default function MarketDetailPage() {
                 </div>
               </div>
 
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handlePlaceBet}
-                disabled={busy}
-                className="w-full py-4 rounded-[20px] font-bold disabled:opacity-40"
-                style={{
-                  background: betOutcome ? "var(--color-primary)" : "var(--color-secondary)",
-                  color: betOutcome ? "#080808" : "#f2f2f0",
-                }}
-              >
-                {busy ? "Enviando..." : `Confirmar prediccion ${betOutcome ? "SI" : "NO"}`}
-              </motion.button>
+              <SwipeToConfirm
+                label={`Desliza para confirmar ${betOutcome ? "SI" : "NO"}`}
+                confirmedLabel={`Apuesta ${betOutcome ? "SI" : "NO"} enviada ✓`}
+                color={betOutcome ? "var(--color-primary)" : "var(--color-secondary)"}
+                textColor={betOutcome ? "#080808" : "#f2f2f0"}
+                onConfirm={handlePlaceBet}
+                disabled={busy || !betAmount || parseFloat(betAmount) <= 0}
+              />
             </div>
           </motion.div>
         )}
