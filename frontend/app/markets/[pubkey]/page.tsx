@@ -471,7 +471,7 @@ export default function MarketDetailPage() {
   return (
     <main className={`min-h-dvh ${showBetSheet ? "pb-64" : "pb-16"}`}>
       {/* Nav superior */}
-      <nav className="fixed top-0 w-full z-50 glass-card flex justify-between items-center px-5 py-3 h-16">
+      <nav className="fixed top-0 w-full z-50 glass-card-solid flex justify-between items-center px-5 py-3 h-16">
         <button
           onClick={() => router.push("/markets")}
           className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 active:scale-95 transition-transform"
@@ -809,7 +809,7 @@ export default function MarketDetailPage() {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="fixed bottom-0 left-0 w-full z-50 p-4"
           >
-            <div className="glass-card rounded-[28px] p-4 shadow-[0_-8px_40px_rgba(0,0,0,0.6)]">
+            <div className="glass-card-solid rounded-[28px] p-4 shadow-[0_-8px_40px_rgba(0,0,0,0.6)]">
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <motion.button
                   whileTap={{ scale: 0.95 }}

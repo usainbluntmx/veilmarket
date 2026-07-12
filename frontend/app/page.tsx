@@ -115,7 +115,7 @@ export default function LandingPage() {
     <main className="min-h-dvh pb-20">
       <WalletLinkedOverlay visible={showWelcome} />
       {/* Nav fija tipo glass */}
-      <nav className="fixed top-0 w-full z-50 glass-card px-5 py-3 flex justify-between items-center h-16">
+      <nav className="fixed top-0 w-full z-50 glass-card-solid px-5 py-3 flex justify-between items-center h-16">
         <div className="font-bold text-lg tracking-tight uppercase text-[color:var(--color-primary)]">
           VeilMarket
         </div>

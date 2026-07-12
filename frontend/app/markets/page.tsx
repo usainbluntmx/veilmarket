@@ -141,7 +141,7 @@ export default function MarketsFeedPage() {
   return (
     <main className="h-dvh w-full overflow-hidden flex flex-col relative">
       {/* Barra superior */}
-      <header className="fixed top-0 w-full z-50 glass-card px-5 py-3 flex justify-between items-center h-16">
+      <header className="fixed top-0 w-full z-50 glass-card-solid px-5 py-3 flex justify-between items-center h-16">
         <Link href="/" className="font-bold text-base tracking-tight" style={{ color: "var(--color-primary)" }}>
           VeilMarket
         </Link>
@@ -158,7 +158,7 @@ export default function MarketsFeedPage() {
       </header>
 
       {/* Canvas central */}
-      <div className="flex-1 flex flex-col items-center justify-center px-5 pt-16 pb-28 relative">
+      <div className="flex-1 flex flex-col items-center justify-center px-5 pt-16 pb-36 relative overflow-y-auto">
         {loading && (
           <p className="font-mono text-sm text-[color:var(--color-text-dim)]">
             Cargando mercados...
@@ -283,7 +283,7 @@ export default function MarketsFeedPage() {
       </div>
 
       {/* Barra inferior */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 glass-card rounded-t-2xl">
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 safe-pb pt-2 glass-card-solid rounded-t-2xl">
         <div
           className="flex flex-col items-center justify-center rounded-full px-4 py-1"
           style={{ background: "var(--color-primary-dim)", color: "var(--color-primary-bright)" }}

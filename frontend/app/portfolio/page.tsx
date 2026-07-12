@@ -130,7 +130,7 @@ export default function PortfolioPage() {
 
   return (
     <main className="min-h-dvh pb-24">
-      <header className="fixed top-0 w-full z-50 glass-card flex justify-between items-center px-5 py-3 h-16">
+      <header className="fixed top-0 w-full z-50 glass-card-solid flex justify-between items-center px-5 py-3 h-16">
         <div className="flex items-center gap-2">
           <Link href="/" className="font-bold text-base tracking-tight" style={{ color: "var(--color-primary)" }}>
             VeilMarket
@@ -321,7 +321,7 @@ export default function PortfolioPage() {
         )}
       </div>
 
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 glass-card rounded-t-2xl">
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 safe-pb pt-2 glass-card-solid rounded-t-2xl">
         <Link href="/markets" className="flex flex-col items-center justify-center text-[color:var(--color-text-dim)]">
           <span className="text-lg">🧭</span>
           <span className="text-[10px] font-mono">Explorar</span>
